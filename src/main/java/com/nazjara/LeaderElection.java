@@ -1,6 +1,7 @@
 package com.nazjara;
 
 import org.apache.zookeeper.*;
+import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -14,7 +15,7 @@ public class LeaderElection implements Watcher {
     private ZooKeeper zookeeper;
     private String currentZnodeName;
 
-    public static void main(String [] args) throws IOException, InterruptedException, KeeperException {
+    public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
         LeaderElection leaderElection = new LeaderElection();
         leaderElection.connectToZookeeper();
         leaderElection.volunteerForLeadership();
@@ -64,7 +65,7 @@ public class LeaderElection implements Watcher {
     public void process(WatchedEvent watchedEvent) {
         switch (watchedEvent.getType()) {
             case None:
-                if(watchedEvent.getState() == Event.KeeperState.SyncConnected) {
+                if (watchedEvent.getState() == Event.KeeperState.SyncConnected) {
                     System.out.println("Successfully connected to ZooKeeper");
                 } else {
                     synchronized (zookeeper) {
