@@ -3,27 +3,17 @@ package com.nazjara;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 public class LeaderElection implements Watcher {
 
-    private static final String ZOOKEEPER_ADDRESS = "localhost:2181";
-    private static final int SESSION_TIMEOUT = 3000;
     private static final String ELECTION_NAMESPACE = "/election";
     private ZooKeeper zookeeper;
     private String currentZnodeName;
 
-    public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
-        LeaderElection leaderElection = new LeaderElection();
-        leaderElection.connectToZookeeper();
-        leaderElection.volunteerForLeadership();
-        leaderElection.reelectLeader();
-        leaderElection.run();
-        leaderElection.close();
-
-        System.out.println("Exiting the application");
+    public LeaderElection(ZooKeeper zookeeper) {
+        this.zookeeper = zookeeper;
     }
 
     public void volunteerForLeadership() throws KeeperException, InterruptedException {
@@ -59,40 +49,14 @@ public class LeaderElection implements Watcher {
         System.out.println("Watching znode " + predecessorZnodeName);
     }
 
-    public void connectToZookeeper() throws IOException {
-        this.zookeeper = new ZooKeeper(ZOOKEEPER_ADDRESS, SESSION_TIMEOUT, this);
-    }
-
-    public void run() throws InterruptedException {
-        synchronized (zookeeper) {
-            zookeeper.wait();
-        }
-    }
-
-    public void close() throws InterruptedException {
-        zookeeper.close();
-    }
-
     @Override
     public void process(WatchedEvent watchedEvent) {
-        switch (watchedEvent.getType()) {
-            case None:
-                if (watchedEvent.getState() == Event.KeeperState.SyncConnected) {
-                    System.out.println("Successfully connected to ZooKeeper");
-                } else {
-                    synchronized (zookeeper) {
-                        System.out.println("Disconnected from ZooKeeper");
-                        zookeeper.notifyAll();
-                    }
-                }
-                break;
-            case NodeDeleted:
-                try {
-                    reelectLeader();
-                } catch (KeeperException | InterruptedException e) {
-                    e.printStackTrace();
-                }
+        if (watchedEvent.getType() == Event.EventType.NodeDeleted) {
+            try {
+                reelectLeader();
+            } catch (KeeperException | InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
-
