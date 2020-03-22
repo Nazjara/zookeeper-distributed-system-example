@@ -9,11 +9,13 @@ import java.util.List;
 public class LeaderElection implements Watcher {
 
     private static final String ELECTION_NAMESPACE = "/election";
-    private ZooKeeper zookeeper;
+    private final ZooKeeper zookeeper;
     private String currentZnodeName;
+    private final OnElectionCallback onElectionCallback;
 
-    public LeaderElection(ZooKeeper zookeeper) {
+    public LeaderElection(ZooKeeper zookeeper, OnElectionCallback onElectionCallback) {
         this.zookeeper = zookeeper;
+        this.onElectionCallback = onElectionCallback;
     }
 
     public void volunteerForLeadership() throws KeeperException, InterruptedException {
@@ -36,9 +38,13 @@ public class LeaderElection implements Watcher {
 
             if (smallestChild.endsWith(currentZnodeName)) {
                 System.out.println("Current znode " + currentZnodeName + " is a leader");
+
+                onElectionCallback.onElectedToBeLeader();
                 return;
             } else {
                 System.out.println("Current znode " + currentZnodeName + " is not a leader.");
+
+                onElectionCallback.onWorker();
 
                 int predecessorIndex = Collections.binarySearch(children, currentZnodeName) - 1;
                 predecessorZnodeName = children.get(predecessorIndex);

@@ -11,13 +11,20 @@ public class Application implements Watcher {
 
     private static final String ZOOKEEPER_ADDRESS = "localhost:2181";
     private static final int SESSION_TIMEOUT = 3000;
+    private static final int DEFAULT_PORT = 8080;
     private ZooKeeper zooKeeper;
 
     public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
+        int currentServerPort = args.length == 1 ? Integer.parseInt(args[0]) : DEFAULT_PORT;
+
         Application application = new Application();
         ZooKeeper zooKeeper = application.connectToZookeeper();
 
-        LeaderElection leaderElection = new LeaderElection(zooKeeper);
+        ServiceRegistry serviceRegistry = new ServiceRegistry(zooKeeper);
+
+        OnElectionCallback onElectionCallback = new OnElectionAction(serviceRegistry, currentServerPort);
+
+        LeaderElection leaderElection = new LeaderElection(zooKeeper, onElectionCallback);
         leaderElection.volunteerForLeadership();
         leaderElection.reelectLeader();
 

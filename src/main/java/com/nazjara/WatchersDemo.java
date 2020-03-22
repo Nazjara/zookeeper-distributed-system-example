@@ -11,7 +11,7 @@ import java.util.List;
 
 public class WatchersDemo implements Watcher {
 
-    private ZooKeeper zookeeper;
+    private final ZooKeeper zookeeper;
     private static final String TARGET_ZNODE = "/target_znode";
 
     public WatchersDemo(ZooKeeper zookeeper) {
