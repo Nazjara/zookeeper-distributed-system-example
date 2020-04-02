@@ -1,4 +1,4 @@
-package com.nazjara;
+package com.nazjara.networking;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpContext;

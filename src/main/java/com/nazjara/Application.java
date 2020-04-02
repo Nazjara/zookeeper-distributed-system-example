@@ -1,5 +1,9 @@
 package com.nazjara;
 
+import com.nazjara.election.LeaderElection;
+import com.nazjara.election.OnElectionAction;
+import com.nazjara.election.OnElectionCallback;
+import com.nazjara.registry.ServiceRegistry;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;

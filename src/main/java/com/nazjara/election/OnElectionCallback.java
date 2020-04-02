@@ -1,4 +1,4 @@
-package com.nazjara;
+package com.nazjara.election;
 
 public interface OnElectionCallback {
     void onElectedToBeLeader();

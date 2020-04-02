@@ -1,5 +1,6 @@
-package com.nazjara;
+package com.nazjara.election;
 
+import com.nazjara.registry.ServiceRegistry;
 import org.apache.zookeeper.KeeperException;
 
 import java.net.InetAddress;
