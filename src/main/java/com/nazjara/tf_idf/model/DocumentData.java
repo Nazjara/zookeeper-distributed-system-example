@@ -1,9 +1,10 @@
 package com.nazjara.tf_idf.model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DocumentData {
+public class DocumentData implements Serializable {
     private Map<String, Double> termToFrequency = new HashMap<>();
 
     public void putTermFrequency(String term, double frequency) {

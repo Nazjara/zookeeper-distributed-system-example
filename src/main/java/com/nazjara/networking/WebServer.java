@@ -7,34 +7,21 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.concurrent.Executors;
 
 public class WebServer {
 
-    private static final String TASK_ENDPOINT = "/task";
     private static final String STATUS_ENDPOINT = "/status";
+    private final OnRequestCallback onRequestCallback;
 
     private final int port;
     private HttpServer server;
 
-    public WebServer(int port) {
+    public WebServer(int port, OnRequestCallback onRequestCallback) {
         this.port = port;
-    }
-
-    public static void main(String[] args) {
-        int port = 8080;
-
-        if(args.length == 1) {
-            port = Integer.parseInt(args[0]);
-        }
-
-        WebServer webServer = new WebServer(port);
-        webServer.startServer();
-
-        System.out.println("Server is listening on port " + port);
+        this.onRequestCallback = onRequestCallback;
     }
 
     public void startServer() {
@@ -46,7 +33,7 @@ public class WebServer {
         }
 
         HttpContext statusContext = server.createContext(STATUS_ENDPOINT);
-        HttpContext taskContext = server.createContext(TASK_ENDPOINT);
+        HttpContext taskContext = server.createContext(onRequestCallback.getEndpoint());
 
         statusContext.setHandler(this::handleStatusCheckRequest);
         taskContext.setHandler(this::handleTaskRequest);
@@ -72,7 +59,7 @@ public class WebServer {
         long startTime = System.currentTimeMillis();
 
         byte[] requestBytes = exchange.getRequestBody().readAllBytes();
-        byte[] responseBytes = calculateResponse(requestBytes);
+        byte[] responseBytes = onRequestCallback.handleRequest(requestBytes);
 
         long finishTime = System.currentTimeMillis();
 
@@ -82,19 +69,6 @@ public class WebServer {
         }
 
         sendResponse(responseBytes, exchange);
-    }
-
-    private byte[] calculateResponse(byte[] requestBytes) {
-        String bodyString = new String(requestBytes);
-        String [] stringNumbers = bodyString.split(",");
-
-        BigInteger result = BigInteger.ONE;
-
-        for(String stringNumber : stringNumbers) {
-            result = result.multiply(new BigInteger(stringNumber));
-        }
-
-        return String.format("Result of calculations: %s\n", result).getBytes();
     }
 
     private void handleStatusCheckRequest(HttpExchange exchange) throws IOException {
@@ -115,7 +89,5 @@ public class WebServer {
         outputStream.write(responseBytes);
         outputStream.flush();
         outputStream.close();
-
-
     }
 }
