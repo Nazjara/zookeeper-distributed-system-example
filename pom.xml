@@ -47,6 +47,12 @@
             <artifactId>zookeeper</artifactId>
             <version>3.6.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.11.4</version>
+        </dependency>
     </dependencies>
 
 </project>

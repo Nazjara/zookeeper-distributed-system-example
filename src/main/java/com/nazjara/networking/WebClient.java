@@ -1,5 +1,8 @@
 package com.nazjara.networking;
 
+import com.nazjara.tf_idf.model.Result;
+import com.nazjara.tf_idf.model.SerializationUtils;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -17,13 +20,15 @@ public class WebClient {
                 .build();
     }
 
-    public CompletableFuture<String> sendTask(String url, byte[] requestPayload) {
+    public CompletableFuture<Result> sendTask(String url, byte[] requestPayload) {
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofByteArray(requestPayload))
                 .uri(URI.create(url))
                 .build();
 
-        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body);
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
+                .thenApply(HttpResponse::body)
+                .thenApply(responseBody -> (Result) SerializationUtils.deserialize(responseBody));
     }
 }
